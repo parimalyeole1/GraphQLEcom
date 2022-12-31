@@ -1,14 +1,20 @@
 import type { CodegenConfig } from "@graphql-codegen/cli";
+import { Module } from "module";
 
 const config: CodegenConfig = {
   overwrite: true,
   schema: "schema.graphql",
-  config: {
-    contextType: "./pages/api/index#GraphQLContext",
-  },
   generates: {
     "types.ts": {
-      plugins: ["typescript", "typescript-resolvers"],
+      config: {
+        contextType: "./pages/api/index#GraphQLContext",
+        mapperTypeSuffix: "Model",
+        mappers: {
+          Cart: "@prisma/client#Cart",
+          CartItem: "@prisma/client#CartItem",
+        },
+      },
+      plugins: ["typescript", "typescript-operations", "typescript-resolvers"],
     },
   },
 };

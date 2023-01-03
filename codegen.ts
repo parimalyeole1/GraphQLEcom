@@ -4,6 +4,7 @@ import { Module } from "module";
 const config: CodegenConfig = {
   overwrite: true,
   schema: "schema.graphql",
+  documents: "**/*.graphql",
   generates: {
     "types.ts": {
       config: {
@@ -14,7 +15,12 @@ const config: CodegenConfig = {
           CartItem: "@prisma/client#CartItem",
         },
       },
-      plugins: ["typescript", "typescript-operations", "typescript-resolvers"],
+      plugins: [
+        "typescript",
+        "typescript-operations",
+        "typescript-resolvers",
+        "typescript-react-apollo",
+      ],
     },
   },
 };

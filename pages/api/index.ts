@@ -6,6 +6,7 @@ import type { PrismaClient } from "@prisma/client";
 import prisma from "../../lib/prisma";
 import { NextApiRequest, NextApiResponse } from "next";
 import currencyFormatter from "currency-formatter";
+import { findOrCreateCart } from "../../lib/cart";
 
 const currencyCode = "USD";
 
@@ -26,14 +27,29 @@ const typeDefs = readFileSync(join(process.cwd(), "schema.graphql"), {
 const resolvers: Resolvers = {
   Query: {
     cart: async (_, { id }, { prisma }) => {
-      let cart = await prisma.cart.findUnique({
-        where: { id },
+      return findOrCreateCart(prisma, id);
+    },
+  },
+  Mutation: {
+    addItem: async (_, { input }, { prisma }) => {
+      const cart = await findOrCreateCart(prisma, input.cartId);
+      await prisma.cartItem.upsert({
+        create: {
+          cartId: cart.id,
+          id: input.id,
+          name: input.name,
+          description: input.description,
+          image: input.image,
+          price: input.price,
+          quantity: input.quantity || 1,
+        },
+        where: { id_cartId: { id: input.id, cartId: cart.id } },
+        update: {
+          quantity: {
+            increment: input.quantity || 1,
+          },
+        },
       });
-      if (!cart) {
-        cart = await prisma.cart.create({
-          data: { id },
-        });
-      }
       return cart;
     },
   },
@@ -65,6 +81,27 @@ const resolvers: Resolvers = {
 
       const amount =
         items.reduce((acc, item) => acc + item.price * item.quantity, 0) ?? 0;
+
+      return {
+        amount,
+        formatted: currencyFormatter.format(amount / 100, {
+          code: currencyCode,
+        }),
+      };
+    },
+  },
+  CartItem: {
+    unitTotal: (item) => {
+      const amount = item.price;
+      return {
+        amount,
+        formatted: currencyFormatter.format(amount / 100, {
+          code: currencyCode,
+        }),
+      };
+    },
+    lineTotal: (item) => {
+      const amount = item.quantity * item.price;
 
       return {
         amount,

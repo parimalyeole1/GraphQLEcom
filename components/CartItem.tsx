@@ -6,11 +6,19 @@ import {
   useIncreaseCartItemMutation,
   useRemoveFromCartMutation,
 } from "../types";
+import { CloseIcon } from "./CloseIcon";
 import { MinusIcon } from "./MinusIcon";
 import { PlusIcon } from "./PlusIcon";
-import { CloseIcon } from "./CloseIcon";
 
-export function CartItem({ item, cartId }: { item: CartItem; cartId: string }) {
+export function CartItem({
+  item,
+  cartId,
+  isReadOnly,
+}: {
+  item: CartItem;
+  cartId: string;
+  isReadOnly?: boolean;
+}) {
   const [increaseCartItem, { loading: increasingCartItem }] =
     useIncreaseCartItemMutation({
       refetchQueries: [GetCartDocument],
@@ -39,32 +47,7 @@ export function CartItem({ item, cartId }: { item: CartItem; cartId: string }) {
         </div>
       </div>
       <div className="flex gap-2">
-        <div className="flex flex-1">
-          <div className="flex-1 border border-neutral-700 px-2 py-1 font-light">
-            {item.quantity}
-          </div>
-          <button
-            onClick={() =>
-              decreaseCartItem({
-                variables: { input: { id: item.id, cartId } },
-              })
-            }
-            disabled={decreasingCartItem}
-            className="border border-neutral-700 p-1 font-light  hover:bg-black hover:text-white"
-          >
-            <MinusIcon />
-          </button>
-          <button
-            onClick={() =>
-              increaseCartItem({
-                variables: { input: { id: item.id, cartId } },
-              })
-            }
-            disabled={increasingCartItem}
-            className="border border-neutral-700 p-1 font-light  hover:bg-black hover:text-white"
-          >
-            <PlusIcon />
-          </button>
+        {isReadOnly ? null : (
           <button
             onClick={() =>
               removeFromCart({
@@ -76,6 +59,37 @@ export function CartItem({ item, cartId }: { item: CartItem; cartId: string }) {
           >
             <CloseIcon />
           </button>
+        )}
+        <div className="flex flex-1">
+          <div className="flex-1 border border-neutral-700 px-2 py-1 font-light">
+            {item.quantity}
+          </div>
+          {isReadOnly ? null : (
+            <>
+              <button
+                onClick={() =>
+                  decreaseCartItem({
+                    variables: { input: { id: item.id, cartId } },
+                  })
+                }
+                disabled={decreasingCartItem}
+                className="border border-neutral-700 p-1 font-light  hover:bg-black hover:text-white"
+              >
+                <MinusIcon />
+              </button>
+              <button
+                onClick={() =>
+                  increaseCartItem({
+                    variables: { input: { id: item.id, cartId } },
+                  })
+                }
+                disabled={increasingCartItem}
+                className="border border-neutral-700 p-1 font-light  hover:bg-black hover:text-white"
+              >
+                <PlusIcon />
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>

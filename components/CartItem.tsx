@@ -4,9 +4,11 @@ import {
   GetCartDocument,
   useDecreaseCartItemMutation,
   useIncreaseCartItemMutation,
+  useRemoveFromCartMutation,
 } from "../types";
 import { MinusIcon } from "./MinusIcon";
 import { PlusIcon } from "./PlusIcon";
+import { CloseIcon } from "./CloseIcon";
 
 export function CartItem({ item, cartId }: { item: CartItem; cartId: string }) {
   const [increaseCartItem, { loading: increasingCartItem }] =
@@ -15,6 +17,10 @@ export function CartItem({ item, cartId }: { item: CartItem; cartId: string }) {
     });
   const [decreaseCartItem, { loading: decreasingCartItem }] =
     useDecreaseCartItemMutation({
+      refetchQueries: [GetCartDocument],
+    });
+  const [removeFromCart, { loading: removingFromCart }] =
+    useRemoveFromCartMutation({
       refetchQueries: [GetCartDocument],
     });
   return (
@@ -58,6 +64,17 @@ export function CartItem({ item, cartId }: { item: CartItem; cartId: string }) {
             className="border border-neutral-700 p-1 font-light  hover:bg-black hover:text-white"
           >
             <PlusIcon />
+          </button>
+          <button
+            onClick={() =>
+              removeFromCart({
+                variables: { input: { id: item.id, cartId } },
+              })
+            }
+            disabled={removingFromCart}
+            className="border border-neutral-700 p-1 font-light  hover:bg-black hover:text-white"
+          >
+            <CloseIcon />
           </button>
         </div>
       </div>

@@ -1,7 +1,22 @@
 import Image from "next/image";
-import { CartItem } from "../types";
+import {
+  CartItem,
+  GetCartDocument,
+  useDecreaseCartItemMutation,
+  useIncreaseCartItemMutation,
+} from "../types";
+import { MinusIcon } from "./MinusIcon";
+import { PlusIcon } from "./PlusIcon";
 
-export function CartItem({ item }: { item: CartItem }) {
+export function CartItem({ item, cartId }: { item: CartItem; cartId: string }) {
+  const [increaseCartItem, { loading: increasingCartItem }] =
+    useIncreaseCartItemMutation({
+      refetchQueries: [GetCartDocument],
+    });
+  const [decreaseCartItem, { loading: decreasingCartItem }] =
+    useDecreaseCartItemMutation({
+      refetchQueries: [GetCartDocument],
+    });
   return (
     <div className="space-y-2">
       <div className="flex gap-4">
@@ -22,6 +37,28 @@ export function CartItem({ item }: { item: CartItem }) {
           <div className="flex-1 border border-neutral-700 px-2 py-1 font-light">
             {item.quantity}
           </div>
+          <button
+            onClick={() =>
+              decreaseCartItem({
+                variables: { input: { id: item.id, cartId } },
+              })
+            }
+            disabled={decreasingCartItem}
+            className="border border-neutral-700 p-1 font-light  hover:bg-black hover:text-white"
+          >
+            <MinusIcon />
+          </button>
+          <button
+            onClick={() =>
+              increaseCartItem({
+                variables: { input: { id: item.id, cartId } },
+              })
+            }
+            disabled={increasingCartItem}
+            className="border border-neutral-700 p-1 font-light  hover:bg-black hover:text-white"
+          >
+            <PlusIcon />
+          </button>
         </div>
       </div>
     </div>
